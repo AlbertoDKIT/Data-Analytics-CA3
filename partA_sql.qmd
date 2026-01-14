@@ -32,12 +32,95 @@ ORDER BY TotalBudget DESC;
 
 result1 <- dbGetQuery(con, query1)
 
-DT::datatable(
-  result1,
-  options = list(pageLength = 8)
-)
+DT::datatable(result1, options = list(pageLength = 8))
+
 
 ```
+
+```{r}
+query2 <- "
+SELECT 
+    AssetCounts.AssetTotal AS NumberOfAssets,
+    AVG(julianday(p.EndDate) - julianday(p.StartDate)) AS AvgDevelopmentDays
+FROM Productions p
+JOIN (
+    SELECT 
+        e.ProductionID,
+        COUNT(a.AssetID) AS AssetTotal
+    FROM Environments e
+    JOIN Assets a
+        ON e.EnvironmentID = a.EnvironmentID
+    GROUP BY e.ProductionID
+) AS AssetCounts
+    ON p.ProductionID = AssetCounts.ProductionID
+GROUP BY AssetCounts.AssetTotal
+ORDER BY NumberOfAssets;
+"
+
+result2 <- dbGetQuery(con, query2)
+DT::datatable(result2, options = list(pageLength = 8))
+
+```
+
+```{r}
+query3 <- "
+SELECT 
+    cm.Name,
+    cm.Role,
+    COUNT(pc.ProductionID) AS SuccessfulProductions
+FROM CrewMembers cm
+JOIN ProductionCrew pc
+    ON cm.CrewID = pc.CrewID
+JOIN Productions p
+    ON pc.ProductionID = p.ProductionID
+WHERE p.Status IN ('Post-production', 'Completed')
+GROUP BY cm.CrewID, cm.Name, cm.Role
+ORDER BY SuccessfulProductions DESC
+LIMIT 3;
+"
+
+result3 <- dbGetQuery(con, query3)
+DT::datatable(result3, options = list(pageLength = 8))
+
+```
+
+```{r}
+query4 <- "
+SELECT Name, Role
+FROM CrewMembers
+WHERE Role LIKE '%Operator%'
+   OR Role LIKE '%Specialist%';
+"
+result4 <- dbGetQuery(con, query4)
+DT::datatable(result4, options = list(pageLength = 8))
+
+```
+
+```{r}
+query5 <- "
+SELECT DISTINCT EngineVersion
+FROM Environments
+ORDER BY EngineVersion DESC;
+"
+result5 <- dbGetQuery(con, query5)
+DT::datatable(result5, options = list(pageLength = 8))
+
+```
+
+```{r}
+query6 <- "
+SELECT Title, Budget
+FROM Productions
+WHERE Budget > (
+    SELECT AVG(Budget)
+    FROM Productions
+);
+"
+result6 <- dbGetQuery(con, query6)
+DT::datatable(result6, options = list(pageLength = 8))
+
+```
+
 
 ```{r}
 dbDisconnect(con)
