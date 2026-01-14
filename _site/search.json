@@ -1,0 +1,16 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "data-analytics-ca3",
+    "section": "",
+    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "partA_sql.html",
+    "href": "partA_sql.html",
+    "title": "Part A – SQL Queries",
+    "section": "",
+    "text": "library(DBI)\nlibrary(RSQLite)\nlibrary(DT)\n\ncon &lt;- dbConnect(\n  SQLite(),\n  \"data/virtual_production.db\"\n)\n\n\nquery1 &lt;- \"\nSELECT \n    c.Country,\n    COUNT(p.ProductionID) AS ProjectCount,\n    SUM(p.Budget) AS TotalBudget\nFROM Productions p\nJOIN Clients c\n    ON p.ClientID = c.ClientID\nGROUP BY c.Country\nORDER BY TotalBudget DESC;\n\"\n\nresult1 &lt;- dbGetQuery(con, query1)\n\nDT::datatable(\n  result1,\n  options = list(pageLength = 8)\n)\n\n\n\n\n\n\ndbDisconnect(con)"
+  }
+]

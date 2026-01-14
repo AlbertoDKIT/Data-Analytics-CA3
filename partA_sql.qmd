@@ -1,0 +1,45 @@
+---
+title: "Part A – SQL Queries"
+format: html
+execute:
+  echo: true
+---
+
+```{r}
+library(DBI)
+library(RSQLite)
+library(DT)
+
+con <- dbConnect(
+  SQLite(),
+  "data/virtual_production.db"
+)
+```
+
+
+```{r}
+query1 <- "
+SELECT 
+    c.Country,
+    COUNT(p.ProductionID) AS ProjectCount,
+    SUM(p.Budget) AS TotalBudget
+FROM Productions p
+JOIN Clients c
+    ON p.ClientID = c.ClientID
+GROUP BY c.Country
+ORDER BY TotalBudget DESC;
+"
+
+result1 <- dbGetQuery(con, query1)
+
+DT::datatable(
+  result1,
+  options = list(pageLength = 8)
+)
+
+```
+
+```{r}
+dbDisconnect(con)
+
+```
