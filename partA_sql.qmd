@@ -16,23 +16,30 @@ con <- dbConnect(
 )
 ```
 
+```{r}
+dbListTables(con)
+dbListFields(con, "Productions")
+dbGetQuery(con, "SELECT DISTINCT Country FROM Clients;")
+
+```
+
 
 ```{r}
 query1 <- "
 SELECT 
     c.Country,
     COUNT(p.ProductionID) AS ProjectCount,
-    SUM(p.Budget) AS TotalBudget
-FROM Productions p
-JOIN Clients c
-    ON p.ClientID = c.ClientID
+    COALESCE(SUM(p.Budget), 0) AS TotalBudget
+FROM Clients c
+LEFT JOIN Productions p
+    ON c.ClientID = p.ClientID
 GROUP BY c.Country
 ORDER BY TotalBudget DESC;
 "
 
 result1 <- dbGetQuery(con, query1)
-
 DT::datatable(result1, options = list(pageLength = 8))
+
 
 
 ```
@@ -60,6 +67,7 @@ ORDER BY NumberOfAssets;
 result2 <- dbGetQuery(con, query2)
 DT::datatable(result2, options = list(pageLength = 8))
 
+
 ```
 
 ```{r}
@@ -82,6 +90,7 @@ LIMIT 3;
 result3 <- dbGetQuery(con, query3)
 DT::datatable(result3, options = list(pageLength = 8))
 
+
 ```
 
 ```{r}
@@ -91,6 +100,7 @@ FROM CrewMembers
 WHERE Role LIKE '%Operator%'
    OR Role LIKE '%Specialist%';
 "
+
 result4 <- dbGetQuery(con, query4)
 DT::datatable(result4, options = list(pageLength = 8))
 
@@ -102,8 +112,10 @@ SELECT DISTINCT EngineVersion
 FROM Environments
 ORDER BY EngineVersion DESC;
 "
+
 result5 <- dbGetQuery(con, query5)
 DT::datatable(result5, options = list(pageLength = 8))
+
 
 ```
 
@@ -116,6 +128,7 @@ WHERE Budget > (
     FROM Productions
 );
 "
+
 result6 <- dbGetQuery(con, query6)
 DT::datatable(result6, options = list(pageLength = 8))
 
