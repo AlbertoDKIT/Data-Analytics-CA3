@@ -152,6 +152,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link active" href="./partA_sql.html" aria-current="page"> 
 <span class="menu-text">Part A – SQL</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./partB_linear_regression.html"> 
+<span class="menu-text">Part B – Linear Regression</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -236,8 +240,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>result1 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query1)</span>
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result1, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-ed5b310d8cf34ceb5159" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-ed5b310d8cf34ceb5159">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],["Germany","UK","Japan","USA","Canada"],[2,2,2,0,0],[950000,880000,770000,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Country<\/th>\n      <th>ProjectCount<\/th>\n      <th>TotalBudget<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Country","targets":1},{"name":"ProjectCount","targets":2},{"name":"TotalBudget","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-23eec4a1549d199c992f" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-23eec4a1549d199c992f">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],["Germany","UK","Japan","USA","Canada"],[2,2,2,0,0],[950000,880000,770000,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Country<\/th>\n      <th>ProjectCount<\/th>\n      <th>TotalBudget<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Country","targets":1},{"name":"ProjectCount","targets":2},{"name":"TotalBudget","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="cell">
@@ -263,8 +267,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>result2 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query2)</span>
 <span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result2, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-e0a25d6d34a417de5732" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-e0a25d6d34a417de5732">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],[4,5,7,8,9],[839,557,729.5,902,629]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>NumberOfAssets<\/th>\n      <th>AvgDevelopmentDays<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"NumberOfAssets","targets":1},{"name":"AvgDevelopmentDays","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-ad5a354d708187443ba7" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-ad5a354d708187443ba7">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],[4,5,7,8,9],[839,557,729.5,902,629]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>NumberOfAssets<\/th>\n      <th>AvgDevelopmentDays<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"NumberOfAssets","targets":1},{"name":"AvgDevelopmentDays","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="cell">
@@ -287,8 +291,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>result3 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query3)</span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result3, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-4a1e30ab76a5c8fd4808" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-4a1e30ab76a5c8fd4808">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["Reese A","Casey R","Jordan G"],["Unreal Operator","Lighting Supervisor","Unreal Operator"],[3,2,1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Name<\/th>\n      <th>Role<\/th>\n      <th>SuccessfulProductions<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Name","targets":1},{"name":"Role","targets":2},{"name":"SuccessfulProductions","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-f096e436916214fe604e" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-f096e436916214fe604e">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["Reese A","Casey R","Jordan G"],["Unreal Operator","Lighting Supervisor","Unreal Operator"],[3,2,1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Name<\/th>\n      <th>Role<\/th>\n      <th>SuccessfulProductions<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Name","targets":1},{"name":"Role","targets":2},{"name":"SuccessfulProductions","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="cell">
@@ -302,8 +306,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>result4 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query4)</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result4, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-abea16337e37ff5b122f" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-abea16337e37ff5b122f">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8"],["Alex U","Jordan G","Riley T","Jamie F","Avery E","Quinn C","Dakota N","Reese A"],["VCam Specialist","Unreal Operator","Unreal Operator","Unreal Operator","VCam Specialist","VCam Specialist","Unreal Operator","Unreal Operator"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Name<\/th>\n      <th>Role<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Name","targets":1},{"name":"Role","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-f4b20045bccee8bf435f" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-f4b20045bccee8bf435f">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8"],["Alex U","Jordan G","Riley T","Jamie F","Avery E","Quinn C","Dakota N","Reese A"],["VCam Specialist","Unreal Operator","Unreal Operator","Unreal Operator","VCam Specialist","VCam Specialist","Unreal Operator","Unreal Operator"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Name<\/th>\n      <th>Role<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Name","targets":1},{"name":"Role","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="cell">
@@ -316,8 +320,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>result5 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query5)</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result5, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-5a68ff94b023e0a766de" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-5a68ff94b023e0a766de">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["UE 5.3","UE 5.2","UE 5.1"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>EngineVersion<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"EngineVersion","targets":1}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-179bfa76abe23aafff44" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-179bfa76abe23aafff44">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["UE 5.3","UE 5.2","UE 5.1"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>EngineVersion<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"EngineVersion","targets":1}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="cell">
@@ -333,8 +337,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>result6 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query6)</span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result6, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-5cb9735c29ac08c673f5" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-5cb9735c29ac08c673f5">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["Starborn Legacy","Gravity Dreams","Quantum Drift"],[500000,600000,450000]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Title<\/th>\n      <th>Budget<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Title","targets":1},{"name":"Budget","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-157ae4f9dbdb47abfd12" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-157ae4f9dbdb47abfd12">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["Starborn Legacy","Gravity Dreams","Quantum Drift"],[500000,600000,450000]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Title<\/th>\n      <th>Budget<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Title","targets":1},{"name":"Budget","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="cell">

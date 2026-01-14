@@ -9,6 +9,9 @@ website:
         text: Home
       - href: partA_sql.qmd
         text: Part A – SQL
+      - href: partB_linear_regression.qmd
+        text: Part B – Linear Regression
+        
 
 format:
   html:

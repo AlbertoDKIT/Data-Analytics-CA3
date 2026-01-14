@@ -1,0 +1,137 @@
+---
+title: "Part B – Linear Regression Analysis"
+format: html
+execute:
+  echo: true
+---
+
+# Linear Regression Analysis of Cinematic Productions
+
+In this section, we perform a linear regression analysis to understand how production **budget** and **crew size** affect the **success rate** of a production.
+
+The **success rate** is defined as:
+
+\[
+\text{SuccessRate} = \frac{\text{ExpectedDuration}}{\text{ActualWorkload}}
+\]
+
+Where:
+
+- **ExpectedDuration** is the planned duration of the production (`EndDate - StartDate`)  
+- **ActualWorkload** is the total duration of all shooting sessions.
+
+## Data Preparation
+
+We first calculate the total actual workload for each production by summing the duration of all shooting sessions.  
+We then merge this with the production budget and crew size to create the dataset for modeling.
+
+```{r}
+library(DBI)
+library(RSQLite)
+library(tidyverse)
+library(ggplot2)
+
+# Connect to database
+con <- dbConnect(SQLite(), "data/virtual_production.db")
+
+# Sum duration hours per production
+actual_workload <- dbGetQuery(con, "
+SELECT 
+    ProductionID,
+    SUM(DurationHours) AS ActualWorkload
+FROM ShootingSessions  -- correct plural table
+GROUP BY ProductionID
+")
+
+# Get production info and crew size
+production_info <- dbGetQuery(con, "
+SELECT 
+    p.ProductionID,
+    p.Budget,
+    julianday(p.EndDate) - julianday(p.StartDate) AS ExpectedDuration,
+    COUNT(pc.CrewID) AS CrewSize
+FROM Productions p
+LEFT JOIN ProductionCrew pc
+    ON p.ProductionID = pc.ProductionID
+GROUP BY p.ProductionID
+")
+
+# Merge datasets and calculate success rate
+data_model <- production_info %>%
+  left_join(actual_workload, by = "ProductionID") %>%
+  mutate(
+    SuccessRate = ExpectedDuration / ActualWorkload
+  )
+
+head(data_model)
+
+```
+
+## Linear Regression Model
+
+We fit a linear regression model to predict `SuccessRate` based on **Budget** and **CrewSize**.
+
+The model coefficients will help us understand the relationship between these variables and production success.
+
+```{r}
+# Fit linear regression
+model <- lm(SuccessRate ~ Budget + CrewSize, data = data_model)
+
+# Show model summary
+summary(model)
+
+```
+
+## Model Visualization
+
+We plot the success rate against budget and crew size to visualise trends and patterns.
+
+```{r}
+ggplot(data_model, aes(x = Budget, y = SuccessRate, color = CrewSize)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(
+    title = "Success Rate vs Budget & Crew Size",
+    x = "Budget",
+    y = "Success Rate",
+    color = "Crew Size"
+  ) +
+  theme_minimal()
+
+```
+
+## Model Interpretation
+
+- **Intercept**: the predicted success rate when both budget and crew size are zero.
+- **Budget coefficient**: the change in success rate for each unit increase in budget, keeping crew size constant.
+- **CrewSize coefficient**: the change in success rate for each additional crew member, keeping budget constant.
+
+**Insights**:
+
+- A positive coefficient indicates that increasing the variable improves the success rate.
+- A negative coefficient indicates that increasing the variable reduces the success rate.
+
+## Model Reliability & Outliers
+
+We examine the residuals and leverage points to identify outliers and evaluate the reliability of the model.
+
+```{r}
+# Check residuals and model diagnostics
+par(mfrow = c(2,2))
+plot(model)
+
+```
+
+Observations:
+
+- Residual vs Fitted: should be randomly scattered; patterns may indicate non-linearity.
+- Normal Q-Q: checks residual normality.
+- Scale-Location: checks for homoscedasticity.
+- Residuals vs Leverage: identifies influential outliers.
+
+Conclusion: Linear regression provides a good first approximation but may be sensitive to outliers or extreme values in budget or crew size.
+
+```{r}
+dbDisconnect(con)
+
+```
