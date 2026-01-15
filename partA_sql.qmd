@@ -5,6 +5,19 @@ execute:
   echo: true
 ---
 
+# Part A – SQL Queries
+
+This section demonstrates the use of SQL to query and analyse an SQLite database containing information about interactive cinematic virtual production projects.  
+The database includes productions, clients, environments, assets, crew members, shooting sessions, and equipment.
+
+All queries are executed using R with the `DBI` and `RSQLite` packages, and results are displayed using interactive tables.
+
+## Database Connection and Exploration
+
+We begin by connecting to the SQLite database and inspecting its structure.  
+Listing the available tables and key fields ensures that queries reference the correct table and column names.
+
+
 ```{r}
 library(DBI)
 library(RSQLite)
@@ -16,12 +29,19 @@ con <- dbConnect(
 )
 ```
 
-```{r}
-dbListTables(con)
-dbListFields(con, "Productions")
-dbGetQuery(con, "SELECT DISTINCT Country FROM Clients;")
+The database contains tables related to productions, clients, crew members, assets, environments, shooting sessions, and equipment.  
+This confirms that the dataset supports analysis across financial, temporal, and personnel dimensions of virtual production.
 
-```
+## Query 1 – Total Budget by Country
+
+**Objective:**  
+List the total budget allocated for productions in each country, along with the number of projects per country.  
+The results are sorted by total budget in descending order.
+
+**Approach:**  
+- Join the `Clients` and `Productions` tables using `ClientID`
+- Aggregate production counts and budgets by country
+- Use a `LEFT JOIN` to ensure countries with no productions are included
 
 
 ```{r}
@@ -43,6 +63,23 @@ DT::datatable(result1, options = list(pageLength = 8))
 
 
 ```
+
+**Result Interpretation:**
+
+- Germany, the UK, and Japan have the highest total production budgets.
+- Some countries (e.g. USA and Canada) appear in the client list but currently have no associated productions.
+- This query demonstrates aggregation (`COUNT`, `SUM`), joins, grouping, and sorting.
+
+
+## Query 2 – Average Development Time by Asset Count
+
+**Objective:**  
+Calculate the average development time for productions, grouped by the number of assets used.
+
+**Approach:**  
+- Count the number of assets per production via `Environments` and `Assets`
+- Calculate development time using the difference between `StartDate` and `EndDate`
+- Group results by asset count to identify trends
 
 ```{r}
 query2 <- "
@@ -70,6 +107,28 @@ DT::datatable(result2, options = list(pageLength = 8))
 
 ```
 
+**Result Interpretation:**
+
+- Productions with a higher number of assets tend to show longer development times.
+- However, the relationship is not strictly linear, suggesting other factors such as production complexity or team efficiency may influence timelines.
+- This query demonstrates subqueries, joins, date calculations, and aggregation.
+
+
+## Query 3 – Top Crew Members by Successful Productions
+
+**Objective:**  
+Identify the top three crew members based on the number of successful productions they have participated in.
+
+**Definition of Success:**  
+Productions with a status of **Post-production** or **Completed** are considered successful.
+
+**Approach:**  
+- Join `CrewMembers`, `ProductionCrew`, and `Productions`
+- Filter productions by status
+- Count the number of successful productions per crew member
+- Sort results and limit output to the top three
+
+
 ```{r}
 query3 <- "
 SELECT 
@@ -93,6 +152,27 @@ DT::datatable(result3, options = list(pageLength = 8))
 
 ```
 
+**Result Interpretation:**
+
+- Unreal Operators appear prominently among the most successful crew members.
+- This highlights the importance of technical Unreal Engine roles in virtual production pipelines.
+- This query demonstrates filtering, grouping, ordering, and limiting results.
+
+
+## Demonstration of Core SQL Concepts
+
+The following queries demonstrate key SQL concepts as required by the assignment.
+
+### SELECT with LIKE and OR
+
+**Objective:**  
+Retrieve crew members whose roles include either *Operator* or *Specialist*.
+
+**Approach:**  
+- Use the `LIKE` operator with wildcards
+- Combine multiple conditions using `OR`
+
+
 ```{r}
 query4 <- "
 SELECT Name, Role
@@ -106,6 +186,18 @@ DT::datatable(result4, options = list(pageLength = 8))
 
 ```
 
+This query demonstrates pattern matching and logical conditions in SQL.
+
+### SELECT with DISTINCT and ORDER BY
+
+**Objective:**  
+List all unique Unreal Engine versions used across environments, sorted in descending order.
+
+**Approach:**  
+- Use `DISTINCT` to remove duplicates
+- Sort results using `ORDER BY`
+
+
 ```{r}
 query5 <- "
 SELECT DISTINCT EngineVersion
@@ -118,6 +210,17 @@ DT::datatable(result5, options = list(pageLength = 8))
 
 
 ```
+
+This query highlights version diversity and demonstrates de-duplication and sorting.
+
+### Subquery with SELECT
+
+**Objective:**  
+Identify productions with a budget higher than the average production budget.
+
+**Approach:**  
+- Calculate the average budget using a subquery
+- Compare each production’s budget against this value
 
 ```{r}
 query6 <- "
@@ -133,6 +236,16 @@ result6 <- dbGetQuery(con, query6)
 DT::datatable(result6, options = list(pageLength = 8))
 
 ```
+
+This query demonstrates the use of subqueries for comparative analysis.
+
+## Conclusion
+
+Part A demonstrates the effective use of SQL for data exploration and analysis within a virtual production context.  
+The queries showcase joins, aggregations, filtering, subqueries, and sorting, providing meaningful insights into budgets, timelines, assets, and crew involvement.
+
+The use of interactive tables enhances readability and allows users to explore the results dynamically.
+
 
 
 ```{r}

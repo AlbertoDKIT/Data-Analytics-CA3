@@ -167,8 +167,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#part-a-sql-queries" id="toc-part-a-sql-queries" class="nav-link active" data-scroll-target="#part-a-sql-queries">Part A – SQL Queries</a>
+  <ul class="collapse">
+  <li><a href="#database-connection-and-exploration" id="toc-database-connection-and-exploration" class="nav-link" data-scroll-target="#database-connection-and-exploration">Database Connection and Exploration</a></li>
+  <li><a href="#query-1-total-budget-by-country" id="toc-query-1-total-budget-by-country" class="nav-link" data-scroll-target="#query-1-total-budget-by-country">Query 1 – Total Budget by Country</a></li>
+  <li><a href="#query-2-average-development-time-by-asset-count" id="toc-query-2-average-development-time-by-asset-count" class="nav-link" data-scroll-target="#query-2-average-development-time-by-asset-count">Query 2 – Average Development Time by Asset Count</a></li>
+  <li><a href="#query-3-top-crew-members-by-successful-productions" id="toc-query-3-top-crew-members-by-successful-productions" class="nav-link" data-scroll-target="#query-3-top-crew-members-by-successful-productions">Query 3 – Top Crew Members by Successful Productions</a></li>
+  <li><a href="#demonstration-of-core-sql-concepts" id="toc-demonstration-of-core-sql-concepts" class="nav-link" data-scroll-target="#demonstration-of-core-sql-concepts">Demonstration of Core SQL Concepts</a>
+  <ul class="collapse">
+  <li><a href="#select-with-like-and-or" id="toc-select-with-like-and-or" class="nav-link" data-scroll-target="#select-with-like-and-or">SELECT with LIKE and OR</a></li>
+  <li><a href="#select-with-distinct-and-order-by" id="toc-select-with-distinct-and-order-by" class="nav-link" data-scroll-target="#select-with-distinct-and-order-by">SELECT with DISTINCT and ORDER BY</a></li>
+  <li><a href="#subquery-with-select" id="toc-subquery-with-select" class="nav-link" data-scroll-target="#subquery-with-select">Subquery with SELECT</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -192,6 +211,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<section id="part-a-sql-queries" class="level1">
+<h1>Part A – SQL Queries</h1>
+<p>This section demonstrates the use of SQL to query and analyse an SQLite database containing information about interactive cinematic virtual production projects.<br>
+The database includes productions, clients, environments, assets, crew members, shooting sessions, and equipment.</p>
+<p>All queries are executed using R with the <code>DBI</code> and <code>RSQLite</code> packages, and results are displayed using interactive tables.</p>
+<section id="database-connection-and-exploration" class="level2">
+<h2 class="anchored" data-anchor-id="database-connection-and-exploration">Database Connection and Exploration</h2>
+<p>We begin by connecting to the SQLite database and inspecting its structure.<br>
+Listing the available tables and key fields ensures that queries reference the correct table and column names.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
@@ -202,150 +230,208 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"data/virtual_production.db"</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>The database contains tables related to productions, clients, crew members, assets, environments, shooting sessions, and equipment.<br>
+This confirms that the dataset supports analysis across financial, temporal, and personnel dimensions of virtual production.</p>
+</section>
+<section id="query-1-total-budget-by-country" class="level2">
+<h2 class="anchored" data-anchor-id="query-1-total-budget-by-country">Query 1 – Total Budget by Country</h2>
+<p><strong>Objective:</strong><br>
+List the total budget allocated for productions in each country, along with the number of projects per country.<br>
+The results are sorted by total budget in descending order.</p>
+<p><strong>Approach:</strong><br>
+- Join the <code>Clients</code> and <code>Productions</code> tables using <code>ClientID</code> - Aggregate production counts and budgets by country - Use a <code>LEFT JOIN</code> to ensure countries with no productions are included</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbListTables</span>(con)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] "Assets"           "Clients"          "CrewMembers"      "Environments"    
- [5] "Equipment"        "ProductionCrew"   "Productions"      "SessionEquipment"
- [9] "ShootingSessions" "VCamTakes"       </code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbListFields</span>(con, <span class="st">"Productions"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "ProductionID" "Title"        "Genre"        "StartDate"    "EndDate"     
-[6] "Budget"       "Status"       "ClientID"    </code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbGetQuery</span>(con, <span class="st">"SELECT DISTINCT Country FROM Clients;"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  Country
-1     USA
-2      UK
-3   Japan
-4  Canada
-5 Germany</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>query1 <span class="ot">&lt;-</span> <span class="st">"</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT </span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="st">    c.Country,</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="st">    COUNT(p.ProductionID) AS ProjectCount,</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="st">    COALESCE(SUM(p.Budget), 0) AS TotalBudget</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="st">FROM Clients c</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="st">LEFT JOIN Productions p</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="st">    ON c.ClientID = p.ClientID</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="st">GROUP BY c.Country</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY TotalBudget DESC;</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>result1 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query1)</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result1, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>query1 <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT </span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">    c.Country,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">    COUNT(p.ProductionID) AS ProjectCount,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">    COALESCE(SUM(p.Budget), 0) AS TotalBudget</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="st">FROM Clients c</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="st">LEFT JOIN Productions p</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="st">    ON c.ClientID = p.ClientID</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="st">GROUP BY c.Country</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY TotalBudget DESC;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>result1 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query1)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result1, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-23eec4a1549d199c992f" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-23eec4a1549d199c992f">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],["Germany","UK","Japan","USA","Canada"],[2,2,2,0,0],[950000,880000,770000,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Country<\/th>\n      <th>ProjectCount<\/th>\n      <th>TotalBudget<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Country","targets":1},{"name":"ProjectCount","targets":2},{"name":"TotalBudget","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-c37a3fd98ec43b67aa6d" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-c37a3fd98ec43b67aa6d">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],["Germany","UK","Japan","USA","Canada"],[2,2,2,0,0],[950000,880000,770000,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Country<\/th>\n      <th>ProjectCount<\/th>\n      <th>TotalBudget<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Country","targets":1},{"name":"ProjectCount","targets":2},{"name":"TotalBudget","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+<p><strong>Result Interpretation:</strong></p>
+<ul>
+<li>Germany, the UK, and Japan have the highest total production budgets.</li>
+<li>Some countries (e.g.&nbsp;USA and Canada) appear in the client list but currently have no associated productions.</li>
+<li>This query demonstrates aggregation (<code>COUNT</code>, <code>SUM</code>), joins, grouping, and sorting.</li>
+</ul>
+</section>
+<section id="query-2-average-development-time-by-asset-count" class="level2">
+<h2 class="anchored" data-anchor-id="query-2-average-development-time-by-asset-count">Query 2 – Average Development Time by Asset Count</h2>
+<p><strong>Objective:</strong><br>
+Calculate the average development time for productions, grouped by the number of assets used.</p>
+<p><strong>Approach:</strong><br>
+- Count the number of assets per production via <code>Environments</code> and <code>Assets</code> - Calculate development time using the difference between <code>StartDate</code> and <code>EndDate</code> - Group results by asset count to identify trends</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>query2 <span class="ot">&lt;-</span> <span class="st">"</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT </span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="st">    AssetCounts.AssetTotal AS NumberOfAssets,</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="st">    AVG(julianday(p.EndDate) - julianday(p.StartDate)) AS AvgDevelopmentDays</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">FROM Productions p</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="st">JOIN (</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT </span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="st">        e.ProductionID,</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="st">        COUNT(a.AssetID) AS AssetTotal</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM Environments e</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="st">    JOIN Assets a</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="st">        ON e.EnvironmentID = a.EnvironmentID</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="st">    GROUP BY e.ProductionID</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="st">) AS AssetCounts</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="st">    ON p.ProductionID = AssetCounts.ProductionID</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="st">GROUP BY AssetCounts.AssetTotal</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY NumberOfAssets;</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>result2 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query2)</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result2, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>query2 <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT </span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">    AssetCounts.AssetTotal AS NumberOfAssets,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">    AVG(julianday(p.EndDate) - julianday(p.StartDate)) AS AvgDevelopmentDays</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">FROM Productions p</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="st">JOIN (</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT </span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="st">        e.ProductionID,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="st">        COUNT(a.AssetID) AS AssetTotal</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM Environments e</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">    JOIN Assets a</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="st">        ON e.EnvironmentID = a.EnvironmentID</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="st">    GROUP BY e.ProductionID</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="st">) AS AssetCounts</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="st">    ON p.ProductionID = AssetCounts.ProductionID</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="st">GROUP BY AssetCounts.AssetTotal</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY NumberOfAssets;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>result2 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query2)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result2, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-ad5a354d708187443ba7" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-ad5a354d708187443ba7">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],[4,5,7,8,9],[839,557,729.5,902,629]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>NumberOfAssets<\/th>\n      <th>AvgDevelopmentDays<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"NumberOfAssets","targets":1},{"name":"AvgDevelopmentDays","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-57dd04393b6e501b2fcb" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-57dd04393b6e501b2fcb">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],[4,5,7,8,9],[839,557,729.5,902,629]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>NumberOfAssets<\/th>\n      <th>AvgDevelopmentDays<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"NumberOfAssets","targets":1},{"name":"AvgDevelopmentDays","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+<p><strong>Result Interpretation:</strong></p>
+<ul>
+<li>Productions with a higher number of assets tend to show longer development times.</li>
+<li>However, the relationship is not strictly linear, suggesting other factors such as production complexity or team efficiency may influence timelines.</li>
+<li>This query demonstrates subqueries, joins, date calculations, and aggregation.</li>
+</ul>
+</section>
+<section id="query-3-top-crew-members-by-successful-productions" class="level2">
+<h2 class="anchored" data-anchor-id="query-3-top-crew-members-by-successful-productions">Query 3 – Top Crew Members by Successful Productions</h2>
+<p><strong>Objective:</strong><br>
+Identify the top three crew members based on the number of successful productions they have participated in.</p>
+<p><strong>Definition of Success:</strong><br>
+Productions with a status of <strong>Post-production</strong> or <strong>Completed</strong> are considered successful.</p>
+<p><strong>Approach:</strong><br>
+- Join <code>CrewMembers</code>, <code>ProductionCrew</code>, and <code>Productions</code> - Filter productions by status - Count the number of successful productions per crew member - Sort results and limit output to the top three</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>query3 <span class="ot">&lt;-</span> <span class="st">"</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT </span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="st">    cm.Name,</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="st">    cm.Role,</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="st">    COUNT(pc.ProductionID) AS SuccessfulProductions</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="st">FROM CrewMembers cm</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="st">JOIN ProductionCrew pc</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="st">    ON cm.CrewID = pc.CrewID</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="st">JOIN Productions p</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="st">    ON pc.ProductionID = p.ProductionID</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="st">WHERE p.Status IN ('Post-production', 'Completed')</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="st">GROUP BY cm.CrewID, cm.Name, cm.Role</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY SuccessfulProductions DESC</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="st">LIMIT 3;</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>result3 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query3)</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result3, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>query3 <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT </span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">    cm.Name,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">    cm.Role,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="st">    COUNT(pc.ProductionID) AS SuccessfulProductions</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="st">FROM CrewMembers cm</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="st">JOIN ProductionCrew pc</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="st">    ON cm.CrewID = pc.CrewID</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="st">JOIN Productions p</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="st">    ON pc.ProductionID = p.ProductionID</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="st">WHERE p.Status IN ('Post-production', 'Completed')</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="st">GROUP BY cm.CrewID, cm.Name, cm.Role</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY SuccessfulProductions DESC</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="st">LIMIT 3;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>result3 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query3)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result3, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-f096e436916214fe604e" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-f096e436916214fe604e">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["Reese A","Casey R","Jordan G"],["Unreal Operator","Lighting Supervisor","Unreal Operator"],[3,2,1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Name<\/th>\n      <th>Role<\/th>\n      <th>SuccessfulProductions<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Name","targets":1},{"name":"Role","targets":2},{"name":"SuccessfulProductions","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-74034fb9ea44fe7b86ba" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-74034fb9ea44fe7b86ba">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["Reese A","Casey R","Jordan G"],["Unreal Operator","Lighting Supervisor","Unreal Operator"],[3,2,1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Name<\/th>\n      <th>Role<\/th>\n      <th>SuccessfulProductions<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Name","targets":1},{"name":"Role","targets":2},{"name":"SuccessfulProductions","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+<p><strong>Result Interpretation:</strong></p>
+<ul>
+<li>Unreal Operators appear prominently among the most successful crew members.</li>
+<li>This highlights the importance of technical Unreal Engine roles in virtual production pipelines.</li>
+<li>This query demonstrates filtering, grouping, ordering, and limiting results.</li>
+</ul>
+</section>
+<section id="demonstration-of-core-sql-concepts" class="level2">
+<h2 class="anchored" data-anchor-id="demonstration-of-core-sql-concepts">Demonstration of Core SQL Concepts</h2>
+<p>The following queries demonstrate key SQL concepts as required by the assignment.</p>
+<section id="select-with-like-and-or" class="level3">
+<h3 class="anchored" data-anchor-id="select-with-like-and-or">SELECT with LIKE and OR</h3>
+<p><strong>Objective:</strong><br>
+Retrieve crew members whose roles include either <em>Operator</em> or <em>Specialist</em>.</p>
+<p><strong>Approach:</strong><br>
+- Use the <code>LIKE</code> operator with wildcards - Combine multiple conditions using <code>OR</code></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>query4 <span class="ot">&lt;-</span> <span class="st">"</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT Name, Role</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="st">FROM CrewMembers</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="st">WHERE Role LIKE '%Operator%'</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="st">   OR Role LIKE '%Specialist%';</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>result4 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query4)</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result4, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>query4 <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT Name, Role</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="st">FROM CrewMembers</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="st">WHERE Role LIKE '%Operator%'</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="st">   OR Role LIKE '%Specialist%';</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>result4 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query4)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result4, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-f4b20045bccee8bf435f" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-f4b20045bccee8bf435f">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8"],["Alex U","Jordan G","Riley T","Jamie F","Avery E","Quinn C","Dakota N","Reese A"],["VCam Specialist","Unreal Operator","Unreal Operator","Unreal Operator","VCam Specialist","VCam Specialist","Unreal Operator","Unreal Operator"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Name<\/th>\n      <th>Role<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Name","targets":1},{"name":"Role","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-19bf0bf2e551cd53e51d" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-19bf0bf2e551cd53e51d">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8"],["Alex U","Jordan G","Riley T","Jamie F","Avery E","Quinn C","Dakota N","Reese A"],["VCam Specialist","Unreal Operator","Unreal Operator","Unreal Operator","VCam Specialist","VCam Specialist","Unreal Operator","Unreal Operator"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Name<\/th>\n      <th>Role<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Name","targets":1},{"name":"Role","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+<p>This query demonstrates pattern matching and logical conditions in SQL.</p>
+</section>
+<section id="select-with-distinct-and-order-by" class="level3">
+<h3 class="anchored" data-anchor-id="select-with-distinct-and-order-by">SELECT with DISTINCT and ORDER BY</h3>
+<p><strong>Objective:</strong><br>
+List all unique Unreal Engine versions used across environments, sorted in descending order.</p>
+<p><strong>Approach:</strong><br>
+- Use <code>DISTINCT</code> to remove duplicates - Sort results using <code>ORDER BY</code></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>query5 <span class="ot">&lt;-</span> <span class="st">"</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT DISTINCT EngineVersion</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">FROM Environments</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY EngineVersion DESC;</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>result5 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query5)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result5, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>query5 <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT DISTINCT EngineVersion</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="st">FROM Environments</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY EngineVersion DESC;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>result5 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query5)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result5, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-179bfa76abe23aafff44" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-179bfa76abe23aafff44">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["UE 5.3","UE 5.2","UE 5.1"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>EngineVersion<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"EngineVersion","targets":1}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-8bbc42f07412350aae1d" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-8bbc42f07412350aae1d">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["UE 5.3","UE 5.2","UE 5.1"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>EngineVersion<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"EngineVersion","targets":1}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+<p>This query highlights version diversity and demonstrates de-duplication and sorting.</p>
+</section>
+<section id="subquery-with-select" class="level3">
+<h3 class="anchored" data-anchor-id="subquery-with-select">Subquery with SELECT</h3>
+<p><strong>Objective:</strong><br>
+Identify productions with a budget higher than the average production budget.</p>
+<p><strong>Approach:</strong><br>
+- Calculate the average budget using a subquery - Compare each production’s budget against this value</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>query6 <span class="ot">&lt;-</span> <span class="st">"</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT Title, Budget</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="st">FROM Productions</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st">WHERE Budget &gt; (</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT AVG(Budget)</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM Productions</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="st">);</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>result6 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query6)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result6, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>query6 <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT Title, Budget</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">FROM Productions</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">WHERE Budget &gt; (</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT AVG(Budget)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM Productions</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="st">);</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>result6 <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query6)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(result6, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-157ae4f9dbdb47abfd12" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-157ae4f9dbdb47abfd12">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["Starborn Legacy","Gravity Dreams","Quantum Drift"],[500000,600000,450000]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Title<\/th>\n      <th>Budget<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Title","targets":1},{"name":"Budget","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-91cdd4e4c4e48909318f" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-91cdd4e4c4e48909318f">{"x":{"filter":"none","vertical":false,"data":[["1","2","3"],["Starborn Legacy","Gravity Dreams","Quantum Drift"],[500000,600000,450000]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Title<\/th>\n      <th>Budget<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Title","targets":1},{"name":"Budget","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+<p>This query demonstrates the use of subqueries for comparative analysis.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Part A demonstrates the effective use of SQL for data exploration and analysis within a virtual production context.<br>
+The queries showcase joins, aggregations, filtering, subqueries, and sorting, providing meaningful insights into budgets, timelines, assets, and crew involvement.</p>
+<p>The use of interactive tables enhances readability and allows users to explore the results dynamically.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

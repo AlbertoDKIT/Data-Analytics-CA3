@@ -84,7 +84,7 @@ summary(model)
 
 ## Model Visualization
 
-We plot the success rate against budget and crew size to visualise trends and patterns.
+We plot the success rate against budget and crew size to visualize trends and patterns.
 
 ```{r}
 ggplot(data_model, aes(x = Budget, y = SuccessRate, color = CrewSize)) +
