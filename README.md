@@ -1,6 +1,6 @@
 # Cinematic Virtual Production Data Analysis
 
-This repository contains the Quarto Website for Parts A, B, and D of the Data Analytics project.
+This repository contains the Quarto Website for Parts A, B, of the Data Analytics project.
 
 ## Main Files
 
@@ -9,9 +9,6 @@ This repository contains the Quarto Website for Parts A, B, and D of the Data An
 
 - **Part B – Linear Regression Analysis:** `partB_linear_regression.qmd`  
   Performs linear regression to predict production success rates based on budget and crew size, with plots and interpretation.
-
-- **Part D – Technology Exploration:** `Technology_Exploration.qmd`  
-  Demonstrates creative use of R packages (`reactable`, `gganimate`, `ggmap`) for enhanced visualization.
 
 ## How to Open
 
